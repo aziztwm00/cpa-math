@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>พีระมิด × CPA × บริบทเป็นฐาน — ครูอาซิส</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#334155;      /* Primary */
+  --a:#94A3B8;      /* Pop accent */
+  --bg:#F8FAFC;     /* Soft background */
+  --w:#FFFFFF;      /* Background */
+  --m:#64748B;      /* mid tint */
+  --l:#E2E8F0;      /* light tint */
+  --l2:#F1F5F9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--p);
+  font-family:'Anuphan','Noto Sans Thai','Sarabun',system-ui,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased}
+b,strong,h1,h2,h3{font-weight:700}
+
+/* ---------- stage: fixed 1280x720 (16:9) scaled to fit the screen ---------- */
+.stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;
+  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center}
+.deck{position:relative;width:100%;height:100%;background:var(--w);border-radius:36px;overflow:hidden;
+  border:1px solid #E8EDF3;box-shadow:0 1px 2px rgba(51,65,85,.06),0 12px 32px rgba(51,65,85,.08)}
+
+.slide{position:absolute;inset:0;padding:40px 56px 0;display:none}
+.slide.active{display:block}
+
+/* ---------- header ---------- */
+.tag{display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 16px 0 14px;border-radius:999px;
+  background:var(--l2);color:var(--p);font-size:16px;font-weight:700}
+.tag i{width:9px;height:9px;border-radius:50%;background:var(--a)}
+h2{font-size:48px;line-height:1.3;margin-top:12px;text-wrap:balance}
+.g{background:linear-gradient(100deg,#334155 15%,#94A3B8 100%);-webkit-background-clip:text;background-clip:text;
+  color:transparent;padding:.14em 0;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+/* ---------- body grids ---------- */
+.body{position:absolute;left:56px;right:56px;top:182px;bottom:84px;display:grid;gap:20px}
+.cols3{grid-template-columns:repeat(3,1fr)}
+
+/* ---------- cards ---------- */
+.card{position:relative;display:flex;flex-direction:column;gap:12px;border-radius:24px;padding:26px 28px;
+  transition:transform .25s ease,box-shadow .25s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(51,65,85,.15)}
+.d1{background:#334155;color:#fff}
+.d2{background:#64748B;color:#fff}
+.d3{background:#E2E8F0;color:#334155}
+.soft{background:#fff;border:1.5px solid #E2E8F0;color:#334155}
+.d1 p,.d1 .k{color:#E2E8F0}.d2 p,.d2 .k{color:#F1F5F9}
+.card h3{font-size:25px;line-height:1.35}
+.card p{font-size:19px;line-height:1.55}
+.k{font-size:17px;font-weight:700;line-height:1.4;opacity:.92}
+.big{font-size:64px;font-weight:700;line-height:1.1}
+.hd{display:flex;align-items:center;gap:14px}
+
+/* icons: white glyph in a circle */
+.ico{flex:none;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,#334155,#64748B);transition:transform .25s ease}
+.ico svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.d1 .ico,.d2 .ico{background:rgba(255,255,255,.2)}
+.d3 .ico,.soft .ico{background:#334155}
+.ico:hover,.card:hover .ico{transform:scale(1.12)}
+.ico.sm{width:46px;height:46px}.ico.sm svg{width:23px;height:23px}
+
+/* ---------- entrance animation: cards float up one by one ---------- */
+.rise{opacity:0}
+.slide.active .rise{animation:rise .65s cubic-bezier(.22,.9,.3,1) both;animation-delay:calc(var(--i,0)*.14s + .05s)}
+@keyframes rise{from{opacity:0;translate:0 34px}to{opacity:1;translate:0 0}}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0 round 16px)}to{clip-path:inset(0 0 0 0 round 16px)}}
+
+/* mini bars */
+.mini{height:12px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
+.mb{height:100%;width:0;background:#fff;border-radius:99px;transition:width 1.1s cubic-bezier(.2,.8,.2,1) .7s}
+.slide.active .mb{width:var(--w)}
+.mrow{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
+.mrow .mini{flex:1}.mrow span{width:92px}
+
+/* ---------- footer / pager ---------- */
+.foot{position:absolute;left:56px;bottom:27px;font-size:15px;color:var(--m);z-index:5}
+.pager{position:absolute;right:48px;bottom:18px;display:flex;align-items:center;gap:10px;z-index:5;font-size:16px;font-weight:700}
+.pager button{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--l);background:#fff;color:var(--p);
+  display:grid;place-items:center;cursor:pointer;transition:.2s}
+.pager button:hover:not(:disabled){background:var(--p);color:#fff}
+.pager button:disabled{opacity:.35;cursor:default}
+.pager svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pager .prev svg{transform:scaleX(-1)}
+.pager span{min-width:62px;text-align:center}
+.prog{position:absolute;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#334155,#94A3B8);transition:width .5s ease;z-index:6}
+
+/* ---------- slide 1 ---------- */
+.s1 .hero{position:absolute;left:56px;top:56px;width:690px;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.s1 h1{font-size:38px;line-height:1.4;margin-top:20px;text-wrap:pretty}
+.s1 .g{white-space:nowrap}
+.s1 .row{display:flex;gap:16px;margin-top:34px;align-self:stretch}
+.s1 .row .card{flex:1;padding:20px 22px;gap:8px}
+.s1 .row .card p{font-size:17px;line-height:1.45}
+.s1 .row .card b{font-size:20px;line-height:1.4}
+.s1 .src{margin-top:22px;font-size:15px;line-height:1.55;color:var(--m)}
+.art{position:absolute;right:44px;top:84px;width:430px}
+.art svg.pyr{width:100%;display:block}
+.flow{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.chip{width:118px;border:1.5px solid var(--l);background:#fff;border-radius:20px;padding:14px 8px 12px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700;font-size:18px;
+  box-shadow:0 4px 12px rgba(51,65,85,.06)}
+.chip .ico{width:48px;height:48px}
+.flow .ar{width:22px;height:22px;stroke:var(--a);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- slide 2 ---------- */
+.s2 .card{padding:28px 30px}
+.net{position:absolute;right:22px;bottom:20px;width:128px;opacity:.95}
+
+/* ---------- slide 3 ---------- */
+.g3{grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 104px}
+.steps{display:flex;align-items:stretch;gap:8px;margin-top:4px}
+.step{flex:1;background:rgba(255,255,255,.12);border-radius:18px;padding:16px 10px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:4px}
+.step .ico{margin-bottom:6px}
+.step b{font-size:20px}.step small{font-size:14px;opacity:.85;letter-spacing:.04em}
+.step span{font-size:16px;line-height:1.4;color:#E2E8F0}
+.steps .ar{align-self:center;width:20px;height:20px;flex:none;stroke:#94A3B8;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.strip{flex-direction:row;align-items:center;gap:18px;padding:14px 26px}
+.strip p{font-size:19px;line-height:1.5}
+.span2{grid-column:1/-1}
+
+/* ---------- slide 4 ---------- */
+.s4 .card{padding:30px}
+.no{position:absolute;right:24px;top:14px;font-size:84px;font-weight:700;line-height:1;opacity:.13}
+.s4 .card h3{font-size:28px;margin-top:6px}
+
+/* ---------- slide 5 ---------- */
+.g5{grid-template-rows:172px 1fr}
+.pp{display:flex;align-items:stretch;gap:12px;margin-top:2px}
+.pp .box{flex:1;background:rgba(255,255,255,.13);border-radius:18px;padding:8px 16px;display:flex;align-items:center;gap:14px}
+.pp .box strong{font-size:36px;line-height:1}
+.pp .box span{font-size:18px;line-height:1.4}
+.pp .ar{align-self:center;width:24px;height:24px;flex:none;stroke:#94A3B8;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.row2{display:grid;grid-template-columns:1fr 52px 1fr;gap:0;align-items:stretch}
+.mid{display:grid;place-items:center}
+.mid .ico{width:44px;height:44px}.mid .ico svg{width:22px;height:22px}
+.row2 .card{padding:22px 28px;gap:8px}
+.row2 .big{font-size:52px}
+
+/* ---------- slide 6 ---------- */
+.s6 .big{font-size:56px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.pills span{background:rgba(255,255,255,.2);border-radius:99px;padding:3px 13px;font-size:16px;font-weight:700}
+.d3 .pills span{background:#fff}
+
+.s6 .card,.g10 .card:not(.thanks),.s4 .card{justify-content:center}
+/* ---------- slide 7 ---------- */
+.g7{grid-template-columns:350px 1fr;grid-template-rows:1fr 72px}
+.cmp{display:flex;align-items:center;gap:12px;font-size:54px;font-weight:700;line-height:1.1}
+.cmp svg{width:30px;height:30px;stroke:#94A3B8;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.pill{align-self:flex-start;background:rgba(255,255,255,.18);border-radius:99px;padding:6px 18px;font-size:19px;font-weight:700}
+.legend{display:flex;gap:18px;font-size:16px;font-weight:700;margin-left:auto}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:7px;vertical-align:-2px}
+.brow{display:flex;flex-direction:column;gap:4px}
+.rl{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.rl b{font-size:19px}.rl span{font-size:15px;color:var(--m);white-space:nowrap}
+.bl{display:flex;align-items:center;gap:12px}
+.track{flex:1;height:16px;background:#F8FAFC;border-radius:99px;overflow:hidden}
+.bar{height:100%;width:0;border-radius:99px;transition:width 1.1s cubic-bezier(.2,.8,.2,1) .9s}
+.slide.active .bar{width:var(--w)}
+.bar.pre{background:#94A3B8}.bar.post{background:#334155}
+.bl em{width:44px;font-style:normal;font-weight:700;font-size:17px;text-align:right}
+
+/* ---------- slide 8 ---------- */
+.g8{grid-template-columns:1fr 1.12fr;grid-template-rows:1fr 82px}
+.gbig{font-size:60px;font-weight:700;line-height:1.1}
+.formula{font-size:17px;line-height:1.5;color:#E2E8F0}
+.gauge{position:relative;display:flex;height:16px;border-radius:99px;overflow:visible;margin-top:22px}
+.gauge i{display:block;height:100%}
+.gauge i:nth-child(1){width:30%;background:rgba(255,255,255,.2);border-radius:99px 0 0 99px}
+.gauge i:nth-child(2){width:40%;background:rgba(255,255,255,.55)}
+.gauge i:nth-child(3){width:30%;background:rgba(255,255,255,.2);border-radius:0 99px 99px 0}
+.gauge .pin,.scale .pin{position:absolute;top:-6px;width:28px;height:28px;border-radius:50%;background:#334155;border:4px solid #fff;
+  transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.glab{display:flex;font-size:15px;margin-top:8px;color:#E2E8F0}
+.glab span:nth-child(1){width:30%}.glab span:nth-child(2){width:40%;text-align:center;font-weight:700;color:#fff}.glab span:nth-child(3){width:30%;text-align:right}
+.stack{display:flex;height:64px;border-radius:16px;overflow:hidden;margin-top:6px}
+.slide.active .stack{animation:wipe 1.1s cubic-bezier(.3,.8,.3,1) .8s both}
+.stack div{display:grid;place-items:center;font-size:21px;font-weight:700;color:#fff}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:6px;font-size:18px}
+.lg div{display:flex;align-items:center;gap:10px}
+.lg i{width:16px;height:16px;border-radius:5px;flex:none}
+
+/* ---------- slide 9 ---------- */
+.g9{grid-template-columns:380px 1fr;grid-template-rows:repeat(3,1fr);gap:16px 20px}
+.g9 .left{grid-row:1/4;justify-content:flex-start;gap:12px}
+.scale{position:relative;height:16px;border-radius:99px;background:rgba(255,255,255,.2);margin-top:26px}
+.scale .hi{position:absolute;left:80.25%;right:0;top:0;bottom:0;background:rgba(255,255,255,.75);border-radius:0 99px 99px 0}
+.slab{display:flex;justify-content:space-between;font-size:15px;color:#E2E8F0;margin-top:8px}
+.item{flex-direction:row;align-items:center;gap:22px;padding:18px 28px}
+.item .num{font-size:52px;font-weight:700;line-height:1;min-width:128px}
+.item .tx b{font-size:21px;display:block;line-height:1.4}
+.item .tx span{font-size:17px;line-height:1.45;display:block;margin-top:2px}
+.d3 .tx span{color:#475569}.d2 .tx span{color:#F1F5F9}
+
+/* ---------- slide 10 ---------- */
+.g10{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 84px}
+.g10 .card p{font-size:20px;line-height:1.6}
+.thanks{grid-column:1/-1;flex-direction:row;align-items:center;gap:18px;padding:14px 28px}
+.thanks b{font-size:30px}
+.thanks p{font-size:19px}
+
+@media (prefers-reduced-motion:reduce){
+  .slide.active .rise{animation:none;opacity:1}
+  .mb,.bar{transition:none}.slide.active .stack{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-cube" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></symbol>
+<symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+<symbol id="i-clip" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
+<symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></symbol>
+</defs>
+</svg>
+
+<div class="stage" id="stage">
+<div class="deck" id="deck">
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide s1 active" data-foot="ครูอาซิส · พีระมิด × CPA × บริบทเป็นฐาน">
+  <div class="hero">
+    <span class="tag rise" style="--i:0"><i></i>คณิตศาสตรศึกษา · สัมมนางานวิจัย</span>
+    <h1 class="rise" style="--i:1">การพัฒนาผลสัมฤทธิ์ทางการเรียนเรื่อง<span class="g">พีระมิด</span> โดยใช้สื่อรูปธรรมตามแนวทาง <span class="g">CPA</span> ร่วมกับการจัดการเรียนรู้แบบ<span class="g">บริบทเป็นฐาน</span></h1>
+    <div class="row">
+      <div class="card d1 rise" style="--i:2">
+        <div class="hd"><span class="ico sm"><svg><use href="#i-cap"/></svg></span><p>นำเสนอโดย</p></div>
+        <b>นายอับดุลอาซิส หะมะ (ครูอาซิส)</b>
+      </div>
+      <div class="card d3 rise" style="--i:3">
+        <div class="hd"><span class="ico sm"><svg><use href="#i-users"/></svg></span><p>ผู้ฟังวันนี้</p></div>
+        <b>นักศึกษาปริญญาโท และอาจารย์ประจำหลักสูตร</b>
+      </div>
+    </div>
+    <p class="src rise" style="--i:4">งานวิจัยโดย พิริยา ปรุงเลิศบัวทอง, ยาฮารียะห์ ดือราแม, อับดุลอาซิส หะมะ, อุลฮุสนา จือนารา และอามีนา เย็ง · วารสารสังคมพัฒนศาสตร์ ปีที่ 9 ฉบับที่ 9 (ก.ย. 2569)</p>
+  </div>
+
+  <div class="art rise" style="--i:2">
+    <svg class="pyr" viewBox="0 0 440 350" aria-hidden="true">
+      <defs>
+        <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#CBD5E1"/><stop offset="1" stop-color="#94A3B8"/></linearGradient>
+        <linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#64748B"/><stop offset="1" stop-color="#334155"/></linearGradient>
+      </defs>
+      <ellipse cx="222" cy="300" rx="178" ry="34" fill="#E2E8F0" opacity=".75"/>
+      <polygon points="222,28 66,246 218,314" fill="url(#gl)"/>
+      <polygon points="222,28 218,314 380,246" fill="url(#gr)"/>
+      <path d="M222 28 L218 314" stroke="#fff" stroke-width="2.5" opacity=".7"/>
+      <circle cx="222" cy="28" r="7" fill="#fff" stroke="#334155" stroke-width="3"/>
+    </svg>
+    <div class="flow">
+      <div class="chip"><span class="ico"><svg><use href="#i-hand"/></svg></span>รูปธรรม</div>
+      <svg class="ar"><use href="#i-arrow"/></svg>
+      <div class="chip"><span class="ico"><svg><use href="#i-image"/></svg></span>ภาพ</div>
+      <svg class="ar"><use href="#i-arrow"/></svg>
+      <div class="chip"><span class="ico"><svg><use href="#i-calc"/></svg></span>สูตร</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. PROBLEM ============ -->
+<section class="slide s2" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9)">
+  <span class="tag rise" style="--i:0"><i></i>บทนำ · ที่มาของปัญหา</span>
+  <h2 class="rise" style="--i:1">ปัญหาที่ครูคณิตศาสตร์ <span class="g">เจอจริง</span></h2>
+  <div class="body cols3">
+    <div class="card d1 rise" style="--i:2">
+      <span class="ico"><svg><use href="#i-chart"/></svg></span>
+      <div class="k">O-NET ปีการศึกษา 2567<br>ม.3 จังหวัดยะลา</div>
+      <div class="big">22.49%</div>
+      <p>คะแนนเฉลี่ยวิชาคณิตศาสตร์</p>
+      <div class="mini" style="margin-top:auto"><div class="mb" style="--w:22.49%"></div></div>
+    </div>
+    <div class="card d2 rise" style="--i:3">
+      <span class="ico"><svg><use href="#i-globe"/></svg></span>
+      <div class="k">PISA 2022<br>คะแนนเฉลี่ยของนักเรียนไทย</div>
+      <div class="big">394</div>
+      <p>ต่ำกว่าค่าเฉลี่ยที่ 472</p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+        <div class="mrow"><span>ไทย 394</span><div class="mini"><div class="mb" style="--w:83.5%"></div></div></div>
+        <div class="mrow"><span>เฉลี่ย 472</span><div class="mini"><div class="mb" style="--w:100%;opacity:.55"></div></div></div>
+      </div>
+    </div>
+    <div class="card d3 rise" style="--i:4">
+      <span class="ico"><svg><use href="#i-cube"/></svg></span>
+      <div class="k">ในห้องเรียนของครู</div>
+      <h3>นึกภาพพีระมิด 3 มิติจากรูปคลี่ไม่ออก</h3>
+      <p>ไม่เข้าใจที่มาของสูตร พอโจทย์ต่างจากตัวอย่างก็ไปต่อไม่ได้</p>
+      <svg class="net" viewBox="0 0 160 160" aria-hidden="true">
+        <g fill="#fff" stroke="#334155" stroke-width="2.5" stroke-linejoin="round">
+          <rect x="55" y="55" width="50" height="50"/>
+          <polygon points="55,55 105,55 80,12" fill="#94A3B8"/>
+          <polygon points="55,105 105,105 80,148" fill="#94A3B8"/>
+          <polygon points="55,55 55,105 12,80" fill="#CBD5E1"/>
+          <polygon points="105,55 105,105 148,80" fill="#CBD5E1"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. CONCEPTS ============ -->
+<section class="slide s3" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9)">
+  <span class="tag rise" style="--i:0"><i></i>แนวคิดที่ใช้</span>
+  <h2 class="rise" style="--i:1">หยิบ <span class="g">2 แนวคิด</span> มาจับคู่กัน</h2>
+  <div class="body g3">
+    <div class="card d1 rise" style="--i:2">
+      <div class="hd"><span class="ico"><svg><use href="#i-layers"/></svg></span><h3>CPA: จากจับต้องได้ สู่สูตร</h3></div>
+      <div class="steps">
+        <div class="step"><span class="ico sm"><svg><use href="#i-hand"/></svg></span><b>รูปธรรม</b><small>CONCRETE</small><span>จับ ประกอบ สังเกตรูปทรงจริง</span></div>
+        <svg class="ar"><use href="#i-arrow"/></svg>
+        <div class="step"><span class="ico sm"><svg><use href="#i-image"/></svg></span><b>ภาพ</b><small>PICTORIAL</small><span>วาดภาพ ดูรูปคลี่</span></div>
+        <svg class="ar"><use href="#i-arrow"/></svg>
+        <div class="step"><span class="ico sm"><svg><use href="#i-calc"/></svg></span><b>นามธรรม</b><small>ABSTRACT</small><span>สรุปเป็นสูตร แล้วคำนวณ</span></div>
+      </div>
+    </div>
+    <div class="card d2 rise" style="--i:3">
+      <div class="hd"><span class="ico"><svg><use href="#i-pin"/></svg></span><h3>บริบทเป็นฐาน</h3></div>
+      <p>เริ่มจากสถานการณ์ใกล้ตัว เช่น สถาปัตยกรรมหรือบรรจุภัณฑ์ แล้วใช้คณิตศาสตร์อธิบายสถานการณ์นั้น</p>
+    </div>
+    <div class="card d3 strip span2 rise" style="--i:4">
+      <span class="ico"><svg><use href="#i-bulb"/></svg></span>
+      <p><b>ทำไมต้องจับคู่?</b> CPA ช่วยให้เข้าใจรูปทรงและที่มาของสูตร ส่วนบริบทช่วยให้เห็นว่าเอาไปแก้ปัญหาจริงได้อย่างไร</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. OBJECTIVES ============ -->
+<section class="slide s4" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9)">
+  <span class="tag rise" style="--i:0"><i></i>วัตถุประสงค์</span>
+  <h2 class="rise" style="--i:1">อยากรู้ <span class="g">3 เรื่อง</span></h2>
+  <div class="body cols3">
+    <div class="card d1 rise" style="--i:2">
+      <span class="no">1</span>
+      <span class="ico"><svg><use href="#i-chart"/></svg></span>
+      <h3>เทียบผลสัมฤทธิ์</h3>
+      <p>คะแนนเรื่องพีระมิดของนักเรียน ม.3 ก่อนเรียน กับหลังเรียน</p>
+    </div>
+    <div class="card d2 rise" style="--i:3">
+      <span class="no">2</span>
+      <span class="ico"><svg><use href="#i-trend"/></svg></span>
+      <h3>ดูความก้าวหน้า</h3>
+      <p>คะแนนเพิ่มขึ้นมากแค่ไหน เมื่อเทียบกับที่เพิ่มได้สูงสุด</p>
+    </div>
+    <div class="card d3 rise" style="--i:4">
+      <span class="no">3</span>
+      <span class="ico"><svg><use href="#i-smile"/></svg></span>
+      <h3>ถามความพึงพอใจ</h3>
+      <p>นักเรียนรู้สึกอย่างไรกับกิจกรรมการเรียนรู้ที่ออกแบบขึ้น</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. DESIGN & SAMPLE ============ -->
+<section class="slide s5" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9)">
+  <span class="tag rise" style="--i:0"><i></i>วิธีดำเนินการวิจัย</span>
+  <h2 class="rise" style="--i:1">วิจัยกับใคร <span class="g">ทำอย่างไร</span></h2>
+  <div class="body g5">
+    <div class="card d1 rise" style="--i:2">
+      <div class="hd"><span class="ico"><svg><use href="#i-flask"/></svg></span><h3>แบบแผน One-Group Pretest–Posttest</h3></div>
+      <div class="pp">
+        <div class="box"><strong>O<sub>1</sub></strong><span>ทดสอบก่อนเรียน</span></div>
+        <svg class="ar"><use href="#i-arrow"/></svg>
+        <div class="box"><strong>X</strong><span>กิจกรรม CPA + บริบทเป็นฐาน</span></div>
+        <svg class="ar"><use href="#i-arrow"/></svg>
+        <div class="box"><strong>O<sub>2</sub></strong><span>ทดสอบหลังเรียน</span></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="card d2 rise" style="--i:3">
+        <div class="hd"><span class="ico"><svg><use href="#i-users"/></svg></span><div class="k">ประชากร</div></div>
+        <div class="big">349 คน</div>
+        <p>ม.3 โรงเรียนพัฒนาวิทยา 10 ห้อง (ภาคเรียนที่ 2/2568)</p>
+      </div>
+      <div class="mid rise" style="--i:4"><span class="ico"><svg><use href="#i-arrow"/></svg></span></div>
+      <div class="card d3 rise" style="--i:4">
+        <div class="hd"><span class="ico"><svg><use href="#i-target"/></svg></span><div class="k">กลุ่มตัวอย่าง</div></div>
+        <div class="big">37 คน</div>
+        <p>ห้อง ม.3/4 สุ่มแบบยกกลุ่ม โดยใช้ห้องเรียนเป็นหน่วยสุ่ม</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. INSTRUMENTS ============ -->
+<section class="slide s6" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9)">
+  <span class="tag rise" style="--i:0"><i></i>เครื่องมือวิจัย</span>
+  <h2 class="rise" style="--i:1">เครื่องมือที่ใช้ <span class="g">3 อย่าง</span></h2>
+  <div class="body cols3">
+    <div class="card d1 rise" style="--i:2">
+      <span class="ico"><svg><use href="#i-clip"/></svg></span>
+      <h3>แผนการจัดการเรียนรู้</h3>
+      <div class="big">5 แผน</div>
+      <p>รวม 10 ชั่วโมง ผู้เชี่ยวชาญ 3 ท่านตรวจสอบความเที่ยงตรงเชิงเนื้อหา</p>
+    </div>
+    <div class="card d2 rise" style="--i:3">
+      <span class="ico"><svg><use href="#i-file"/></svg></span>
+      <h3>แบบทดสอบผลสัมฤทธิ์</h3>
+      <div class="big">10 ข้อ</div>
+      <p>ปรนัย 4 ตัวเลือก แบ่งเป็น 3 ด้าน (2 + 4 + 4 ข้อ)</p>
+      <div class="pills"><span>IOC 1.00</span><span>ความยาก 0.25–0.73</span><span>อำนาจจำแนก 0.20–0.55</span></div>
+    </div>
+    <div class="card d3 rise" style="--i:4">
+      <span class="ico"><svg><use href="#i-smile"/></svg></span>
+      <h3>แบบสอบถามความพึงพอใจ</h3>
+      <div class="big">10 ข้อ</div>
+      <p>เกณฑ์ 5 ระดับ โดยค่าเฉลี่ย 4.21–5.00 แปลว่าพอใจมากที่สุด</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. RESULT 1 ============ -->
+<section class="slide s7" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ตารางที่ 2">
+  <span class="tag rise" style="--i:0"><i></i>ผลที่ 1 · ผลสัมฤทธิ์ทางการเรียน</span>
+  <h2 class="rise" style="--i:1">คะแนนหลังเรียน <span class="g">สูงกว่าก่อนเรียน</span></h2>
+  <div class="body g7">
+    <div class="card d1 rise" style="--i:2">
+      <span class="ico"><svg><use href="#i-chart"/></svg></span>
+      <div class="k">คะแนนเฉลี่ยรวม (เต็ม 10)</div>
+      <div class="cmp">3.59<svg><use href="#i-arrow"/></svg>7.16</div>
+      <p>S.D. 1.40 → 1.52</p>
+      <div class="pill" style="margin-top:auto">t = 9.52 · p = .001</div>
+    </div>
+    <div class="card d3 rise" style="--i:3;gap:10px;padding:18px 28px">
+      <div class="hd" style="gap:10px">
+        <h3 style="font-size:22px">คะแนนเฉลี่ยรายด้าน</h3>
+        <div class="legend"><span><i style="background:#94A3B8"></i>ก่อนเรียน</span><span><i style="background:#334155"></i>หลังเรียน</span></div>
+      </div>
+      <div class="brow">
+        <div class="rl"><b>ส่วนประกอบและรูปคลี่ (เต็ม 2)</b><span>t = 2.59 · p = .014</span></div>
+        <div class="bl"><div class="track"><div class="bar pre" style="--w:65%"></div></div><em>1.30</em></div>
+        <div class="bl"><div class="track"><div class="bar post" style="--w:82.5%"></div></div><em>1.65</em></div>
+      </div>
+      <div class="brow">
+        <div class="rl"><b>พื้นที่ผิวจากสถานการณ์จำลอง (เต็ม 4)</b><span>t = 4.57 · p = .001</span></div>
+        <div class="bl"><div class="track"><div class="bar pre" style="--w:35.3%"></div></div><em>1.41</em></div>
+        <div class="bl"><div class="track"><div class="bar post" style="--w:63.5%"></div></div><em>2.54</em></div>
+      </div>
+      <div class="brow">
+        <div class="rl"><b>ปริมาตรและการประยุกต์ใช้ (เต็ม 4)</b><span>t = 9.65 · p = .001</span></div>
+        <div class="bl"><div class="track"><div class="bar pre" style="--w:21.5%"></div></div><em>0.86</em></div>
+        <div class="bl"><div class="track"><div class="bar post" style="--w:74.3%"></div></div><em>2.97</em></div>
+      </div>
+    </div>
+    <div class="card d2 strip span2 rise" style="--i:4">
+      <span class="ico sm"><svg><use href="#i-bulb"/></svg></span>
+      <p>ด้านปริมาตรและการประยุกต์ใช้เพิ่มมากที่สุด (0.86 → 2.97) และสูงกว่าก่อนเรียนอย่างมีนัยสำคัญทุกด้านที่ระดับ .05</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. RESULT 2 ============ -->
+<section class="slide s8" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ตารางที่ 3–4">
+  <span class="tag rise" style="--i:0"><i></i>ผลที่ 2 · ความก้าวหน้าทางการเรียน</span>
+  <h2 class="rise" style="--i:1">ความก้าวหน้าอยู่ในระดับ <span class="g">ปานกลาง</span></h2>
+  <div class="body g8">
+    <div class="card d1 rise" style="--i:2">
+      <div class="hd"><span class="ico"><svg><use href="#i-trend"/></svg></span><div class="k">Normalized Gain</div></div>
+      <div class="gbig">&lt;g&gt; = 0.56</div>
+      <div class="formula">(71.6 − 35.9) ÷ (100 − 35.9)<br>= 35.7 ÷ 64.1</div>
+      <div>
+        <div class="gauge"><i></i><i></i><i></i><span class="pin" style="left:56%"></span></div>
+        <div class="glab"><span>ต่ำ &lt; 0.30</span><span>ปานกลาง 0.30–0.69</span><span>สูง ≥ 0.70</span></div>
+      </div>
+    </div>
+    <div class="card d3 rise" style="--i:3">
+      <div class="hd"><span class="ico"><svg><use href="#i-users"/></svg></span><h3>พัฒนาการรายบุคคล (37 คน)</h3></div>
+      <div class="stack" aria-label="สัดส่วนนักเรียนจำแนกตามระดับพัฒนาการ">
+        <div style="width:13.51%;background:#334155">5</div>
+        <div style="width:40.54%;background:#475569">15</div>
+        <div style="width:32.43%;background:#64748B">12</div>
+        <div style="width:5.41%;background:#94A3B8;color:#334155">2</div>
+        <div style="width:8.11%;background:#CBD5E1;color:#334155">3</div>
+      </div>
+      <div class="lg">
+        <div><i style="background:#334155"></i>สูงมาก · 5 คน (13.5%)</div>
+        <div><i style="background:#475569"></i>สูง · 15 คน (40.5%)</div>
+        <div><i style="background:#64748B"></i>กลาง · 12 คน (32.4%)</div>
+        <div><i style="background:#94A3B8"></i>ต้น · 2 คน (5.4%)</div>
+        <div><i style="background:#CBD5E1"></i>ลดลง · 3 คน (8.1%)</div>
+      </div>
+    </div>
+    <div class="card d2 strip span2 rise" style="--i:4">
+      <span class="ico sm"><svg><use href="#i-check"/></svg></span>
+      <p>รายบุคคล 32 จาก 37 คนอยู่ในระดับกลางขึ้นไป · มี 3 คนที่คะแนนลดลง</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. RESULT 3 ============ -->
+<section class="slide s9" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ตารางที่ 5">
+  <span class="tag rise" style="--i:0"><i></i>ผลที่ 3 · ความพึงพอใจ</span>
+  <h2 class="rise" style="--i:1">นักเรียนพอใจ <span class="g">มากที่สุด</span></h2>
+  <div class="body g9">
+    <div class="card d1 left rise" style="--i:2">
+      <span class="ico"><svg><use href="#i-smile"/></svg></span>
+      <div class="k">ความพึงพอใจโดยรวม (เต็ม 5)</div>
+      <div class="big" style="font-size:84px">4.72</div>
+      <p>S.D. = 0.48 · ระดับมากที่สุด</p>
+      <div style="margin-top:auto">
+        <div class="scale"><div class="hi"></div><span class="pin" style="left:93%"></span></div>
+        <div class="slab"><span>1.00</span><span>4.21–5.00 = มากที่สุด</span><span>5.00</span></div>
+      </div>
+    </div>
+    <div class="card d2 item rise" style="--i:3">
+      <span class="ico"><svg><use href="#i-heart"/></svg></span>
+      <div class="num">4.84</div>
+      <div class="tx"><b>บรรยากาศในชั้นเรียนเอื้อต่อการเรียนรู้</b><span>คะแนนสูงสุดจากทั้ง 10 ข้อ</span></div>
+    </div>
+    <div class="card d3 item rise" style="--i:4">
+      <span class="ico"><svg><use href="#i-bulb"/></svg></span>
+      <div class="num">4.81</div>
+      <div class="tx"><b>เข้าใจพีระมิดง่าย · โจทย์ใกล้ตัวสนุก</b><span>และนำความรู้ไปแก้ปัญหาในสถานการณ์อื่นได้</span></div>
+    </div>
+    <div class="card soft item rise" style="--i:5">
+      <span class="ico"><svg><use href="#i-users"/></svg></span>
+      <div class="num">4.19</div>
+      <div class="tx"><b>กิจกรรมกลุ่มช่วยให้กล้าแสดงความคิดเห็น</b><span style="color:#64748B">ต่ำสุด แต่ยังอยู่ระดับมาก (S.D. 0.86)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. CONCLUSION ============ -->
+<section class="slide s10" data-foot="ที่มา: ปรุงเลิศบัวทอง และคณะ (2569) · ว.สังคมพัฒนศาสตร์ 9(9), 343–352">
+  <span class="tag rise" style="--i:0"><i></i>สรุปและข้อเสนอแนะ</span>
+  <h2 class="rise" style="--i:1">สรุปแล้ว… แล้วเอาไป <span class="g">ต่อยอดอย่างไร</span></h2>
+  <div class="body g10">
+    <div class="card d1 rise" style="--i:2">
+      <span class="ico"><svg><use href="#i-check"/></svg></span>
+      <h3>สรุปผล</h3>
+      <p>CPA + บริบทเป็นฐาน ทำให้คะแนนเพิ่มจาก 3.59 เป็น 7.16 ก้าวหน้าระดับปานกลาง และนักเรียนพอใจมากที่สุด (4.72)</p>
+    </div>
+    <div class="card d2 rise" style="--i:3">
+      <span class="ico"><svg><use href="#i-flag"/></svg></span>
+      <h3>ข้อเสนอแนะ</h3>
+      <p>เลือกบริบทใกล้ตัว เช่น สถาปัตยกรรมท้องถิ่นหรือบรรจุภัณฑ์ แล้วต่อยอดด้วย VR/AR หรือสื่อดิจิทัล</p>
+    </div>
+    <div class="card d3 rise" style="--i:4">
+      <span class="ico"><svg><use href="#i-alert"/></svg></span>
+      <h3>อ่านผลอย่างระมัดระวัง</h3>
+      <p>ใช้กลุ่มเดียว 37 คน ไม่มีกลุ่มควบคุม และแบบทดสอบมี KR-20 = 0.47</p>
+    </div>
+    <div class="card soft thanks rise" style="--i:5">
+      <span class="ico"><svg><use href="#i-msg"/></svg></span>
+      <b class="g">ขอบคุณครับ</b>
+      <p>ยินดีรับคำถามและข้อเสนอแนะจากอาจารย์และเพื่อน ๆ ทุกคน</p>
+    </div>
+  </div>
+</section>
+
+<!-- footer + pager -->
+<div class="foot" id="foot"></div>
+<div class="pager">
+  <button class="prev" id="prev" aria-label="หน้าก่อนหน้า"><svg><use href="#i-chev"/></svg></button>
+  <span id="pg">01 / 10</span>
+  <button class="next" id="next" aria-label="หน้าถัดไป"><svg><use href="#i-chev"/></svg></button>
+</div>
+<div class="prog" id="prog"></div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  var slides=Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var foot=document.getElementById('foot'),pg=document.getElementById('pg'),
+      prog=document.getElementById('prog'),prev=document.getElementById('prev'),next=document.getElementById('next');
+  var cur=0,total=slides.length;
+
+  function pad(n){return (n<10?'0':'')+n}
+  function go(n){
+    n=Math.max(0,Math.min(total-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('active',i===n)});
+    cur=n;
+    foot.textContent=slides[n].getAttribute('data-foot')||'';
+    pg.textContent=pad(n+1)+' / '+total;
+    prog.style.width=((n+1)/total*100)+'%';
+    prev.disabled=(n===0);next.disabled=(n===total-1);
+    try{history.replaceState(null,'','#'+(n+1))}catch(e){}
+  }
+  function fit(){
+    var s=Math.min(window.innerWidth/1280,window.innerHeight/720)*0.98;
+    stage.style.setProperty('--s',s);
+  }
+  prev.addEventListener('click',function(){go(cur-1)});
+  next.addEventListener('click',function(){go(cur+1)});
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='Enter'){e.preventDefault();go(cur+1)}
+    else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace'){e.preventDefault();go(cur-1)}
+    else if(k==='Home'){go(0)}
+    else if(k==='End'){go(total-1)}
+    else if(k==='f'||k==='F'){
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+      else{document.exitFullscreen&&document.exitFullscreen()}
+    }
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;x0=null;
+    if(Math.abs(dx)>50){go(cur+(dx<0?1:-1))}
+  },{passive:true});
+  window.addEventListener('resize',fit);
+  fit();
+  var h=parseInt((location.hash||'').replace('#',''),10);
+  go(isNaN(h)?0:h-1);
+})();
+</script>
+</body>
+</html>
